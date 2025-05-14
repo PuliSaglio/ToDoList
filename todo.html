@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Minha ToDo List</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+
+    <link rel="stylesheet" href="assets/todo.css">
+</head>
+<body class="bg-light">
+
+  <div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h1 class="h3">Minha ToDo List</h1>
+      <button id="btnAbrirModal" class="btn btn-primary">+ Nova Tarefa</button>
+    </div>
+
+    <div class="row g-3 justify-content-between">
+      <div class="col-md-4 coluna">
+        <h5>A Fazer</h5>
+        <div id="colunaAfazer" class="task-column"> 
+        </div>
+      </div>
+      <div class="col-md-4 coluna">
+        <h5>Em Andamento</h5>
+        <div id="colunaAndamento" class="task-column"></div>
+      </div>
+      <div class="col-md-4 coluna">
+        <h5>Concluído</h5>
+        <div id="colunaConcluido" class="task-column"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL -->
+  <div id="modalTarefa" class="d-none">
+    <div class="backdrop"></div>
+    <div class="modal-custom">
+      <form id="formNovaTarefa">
+        <div class="mb-3">
+          <label for="tituloTarefa" class="form-label">Título</label>
+          <input type="text" class="form-control" id="tituloTarefa" required>
+        </div>
+        <div class="mb-3">
+          <label for="descricaoTarefa" class="form-label">Descrição</label>
+          <textarea class="form-control" id="descricaoTarefa" rows="3"></textarea>
+        </div>
+        <div class="mb-3">
+          <label for="dataTarefa" class="form-label">Data</label>
+          <input type="date" class="form-control" id="dataTarefa" required>
+        </div>
+        <div class="mb-3">
+          <label for="prioridadeTarefa" class="form-label">Prioridade: </label>
+          <select name="prioridadeTarefa" id="prioridadeTarefa">
+            <option value="ALTA">Alta</option>
+            <option value="MEDIA">Média</option>
+            <option value="BAIXA">Baixa</option>
+          </select>
+        </div>
+        <div class="mb-3">
+            <label for="notificacaoToggle">Notificação: </label>
+            <div class="btn-group" role="group" id="notificacaoToggle">
+            <input type="radio" class="btn-check" name="notificacao" id="notificaSim" autocomplete="off" value="sim" checked>
+            <label class="btn btn-outline-success" for="notificaSim"><i class="bi bi-bell"></i> Sim</label>
+
+            <input type="radio" class="btn-check" name="notificacao" id="notificaNao" autocomplete="off" value="nao">
+            <label class="btn btn-outline-danger" for="notificaNao"><i class="bi bi-bell-slash"></i> Não</label>
+        </div>
+        </div>
+        <div class="d-flex justify-content-end">
+          <button type="button" id="btnFecharModal" class="btn btn-secondary me-2">Cancelar</button>
+          <button type="submit" class="btn btn-success">Adicionar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="/assets/todo.js"></script>
+
+</body>
+</html>
