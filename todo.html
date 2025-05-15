@@ -39,6 +39,9 @@
     <div class="backdrop"></div>
     <div class="modal-custom">
       <form id="formNovaTarefa">
+        <div class="d-flex justify-content-end mb-2">
+          <button type="button" class="btn-close" aria-label="Close" id="btnFecharModal"></button>
+        </div>
         <div class="mb-3">
           <label for="tituloTarefa" class="form-label">Título</label>
           <input type="text" class="form-control" id="tituloTarefa" required>
@@ -70,7 +73,7 @@
         </div>
         </div>
         <div class="d-flex justify-content-end">
-          <button type="button" id="btnFecharModal" class="btn btn-secondary me-2">Cancelar</button>
+          <button type="button" id="btnResetForm" class="btn btn-secondary me-2">Cancelar</button>
           <button type="submit" class="btn btn-success">Adicionar</button>
         </div>
       </form>
