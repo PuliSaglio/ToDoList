@@ -11,6 +11,10 @@ document.addEventListener('DOMContentLoaded' , function(){
         const cardTarefa = criarCardTarefa(coletarDadosForm());
         estilizarCardTarefa(cardTarefa);
         adicionarTarefa(cardTarefa);
+        cardTarefa.botaoMais.addEventListener('click' , function(){
+            cardTarefa.descricao.classList.toggle('d-none');
+            cardTarefa.dataCriacao.classList.toggle('d-none');
+        });
 
         form.reset();
         modal.classList.add('d-none');
@@ -35,7 +39,14 @@ document.addEventListener('DOMContentLoaded' , function(){
 const colunaTodo = document.getElementById('colunaAfazer');
 
 
+function dataAtualFormatada(){
+    const data = new Date();
+    const dia = String(data.getDate()).padStart(2, '0');
+    const mes = String(data.getMonth() + 1).padStart(2, '0');
+    const ano = String(data.getFullYear()).slice(-2);
 
+    return `${dia}/${mes}/${ano}`;
+}
 
 
 function coletarDadosForm(){
@@ -51,7 +62,7 @@ function coletarDadosForm(){
         data: dataTarefa,
         prioridade: prioridadeTarefa,
         notificacao: notificacaoTarefa,
-        dataCriacao: new Date()
+        dataCriacao: dataAtualFormatada()
     };
 
     return tarefa;
@@ -80,18 +91,22 @@ function criarCardTarefa(tarefa){
     const notificacaoTarefa = document.createElement('p');
     notificacaoTarefa.innerHTML = tarefa.notificacao;
 
+    const dataCriacao = document.createElement('p');
+    dataCriacao.innerHTML = tarefa.dataCriacao;
+
     const cardTarefa = {
         containerSombreado: cardSombreado,
         containerTarefa: novaTarefa,
         cabecalho: cabecalhoCard,
         badge: badge,
-        botao: botaoMais,
+        botaoMais: botaoMais,
         iconeBotao: iconeBotao,
         titulo: tituloTarefa,
         descricao: descricaoTarefa,
         data: dataTarefa,
         prioridade: prioridadeTarefa,
-        notificacao: notificacaoTarefa
+        notificacao: notificacaoTarefa,
+        dataCriacao : dataCriacao
     };
 
     return cardTarefa;
@@ -107,13 +122,14 @@ function estilizarCardTarefa(cardTarefa){
     cardTarefa.descricao.className = "card-text ms-2 mb-2";
     cardTarefa.prioridade.style = "width: 100%";
     cardTarefa.prioridade.style = "height: 8px; border-radius: 5px; margin-bottom: 4px;";
-    cardTarefa.botao.className = "btn btn-sm btn-outline-secondary";
-    cardTarefa.botao.title = "Ver Mais";
-    cardTarefa.botao.type = "button";
-    cardTarefa.botao.style = "height: 20px ; padding-top: 0px;"
+    cardTarefa.botaoMais.className = "btn btn-sm btn-outline-secondary";
+    cardTarefa.botaoMais.title = "Ver Mais";
+    cardTarefa.botaoMais.type = "button";
+    cardTarefa.botaoMais.style = "height: 20px ; padding-top: 0px;"
     cardTarefa.iconeBotao.className = "bi bi-chevron-down";
 
     cardTarefa.descricao.classList.add('d-none');
+    cardTarefa.dataCriacao.classList.add('d-none');
 
     if(cardTarefa.prioridade.innerHTML == 'ALTA'){
         cardTarefa.prioridade.className = "progress-bar bg-danger";
@@ -138,10 +154,17 @@ function adicionarTarefa(cardTarefa){
     cardTarefa.cabecalho.appendChild(cardTarefa.titulo);
     cardTarefa.cabecalho.appendChild(cardTarefa.badge);
     cardTarefa.containerTarefa.appendChild(cardTarefa.descricao);
-    cardTarefa.containerTarefa.appendChild(cardTarefa.botao);
-    cardTarefa.botao.appendChild(cardTarefa.iconeBotao);
+    cardTarefa.containerTarefa.appendChild(cardTarefa.dataCriacao);
+    cardTarefa.containerTarefa.appendChild(cardTarefa.botaoMais);
+    cardTarefa.botaoMais.appendChild(cardTarefa.iconeBotao);
     colunaTodo.appendChild(cardTarefa.containerSombreado);
     cardTarefa.containerSombreado.appendChild(cardTarefa.containerTarefa);
+}
+
+function expandirCardTarefa(cardTarefa){
+    cardTarefa.descricao.classList.remove('d-none');
+    cardTarefa.dataCriacao.classList.remove('d-none');
+
 }
 
 function formataData(data){
