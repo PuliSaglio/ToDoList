@@ -3,6 +3,9 @@ document.addEventListener('DOMContentLoaded' , function(){
     const modal = document.getElementById('modalTarefa');
     const modalEdit = document.getElementById('modalEditTarefa');
     const formEdit = document.getElementById('formEditTarefa');
+    let tarefaEmEdicao = null;
+
+    let contadorTarefa = 0;
 
     const btnAbrirModal = document.getElementById('btnAbrirModal');
     const btnFecharModal = document.getElementById('btnFecharModal');
@@ -13,7 +16,8 @@ document.addEventListener('DOMContentLoaded' , function(){
 
     form.addEventListener('submit', function(event){
         event.preventDefault();
-        const cardTarefa = criarCardTarefa(coletarDadosForm());
+        const cardTarefa = criarCardTarefa(coletarDadosForm(), contadorTarefa);
+        contadorTarefa++;
         estilizarCardTarefa(cardTarefa);
         adicionarTarefa(cardTarefa);
         cardTarefa.botaoMais.addEventListener('click' , function(){
@@ -23,13 +27,13 @@ document.addEventListener('DOMContentLoaded' , function(){
 
         cardTarefa.botaoEdit.addEventListener('click' , function(){
             modalEdit.classList.remove('d-none');
+            tarefaEmEdicao = cardTarefa;
             document.getElementById('tituloTarefaEdit').value = cardTarefa.titulo.innerText;
             document.getElementById('descricaoTarefaEdit').value = cardTarefa.descricao.innerText;
             document.getElementById('dataTarefaEdit').value = desformataData(cardTarefa.data.innerText);
             document.getElementById('prioridadeTarefaEdit').value = cardTarefa.prioridade.innerText;
 
             const notificacao = cardTarefa.notificacao.innerHTML.trim().toLowerCase();
-            console.log(notificacao);
 
             if (notificacao === 'sim') {
                 document.getElementById('notificaSimEdit').checked = true;
@@ -49,7 +53,18 @@ document.addEventListener('DOMContentLoaded' , function(){
     formEdit.addEventListener('submit', function(event){
         event.preventDefault();
         modalEdit.classList.add('d-none');  
-        
+        const dadosFormEdit = coletarDadosFormEdit();
+
+        tarefaEmEdicao.titulo.innerText = dadosFormEdit.titulo;
+        tarefaEmEdicao.descricao.innerText = dadosFormEdit.descricao;
+        tarefaEmEdicao.data.innerText = dadosFormEdit.data;
+        tarefaEmEdicao.prioridade.innerHTML = `<p>${dadosFormEdit.prioridade}</p>`;
+        console.log(tarefaEmEdicao.prioridade.innerHTML);
+        tarefaEmEdicao.notificacao.innerHTML = dadosFormEdit.notificacao;
+
+        estilizarCardTarefa(tarefaEmEdicao);
+        tarefaEmEdicao = null;
+
     });
 
     btnAbrirModal.addEventListener('click', function(){
@@ -123,8 +138,9 @@ function coletarDadosForm(){
     return tarefa;
 }
 
-function criarCardTarefa(tarefa){
+function criarCardTarefa(tarefa, contadorTarefa){
     //separar em funçao que cria os elementos e outra que atribui valores
+    const idTarefa = contadorTarefa;
     const cardSombreado = document.createElement('div');
     const novaTarefa = document.createElement('div');
     const cabecalhoCard = document.createElement('div');
@@ -158,6 +174,7 @@ function criarCardTarefa(tarefa){
     dataCriacao.innerHTML = tarefa.dataCriacao;
 
     const cardTarefa = {
+        idTarefa: idTarefa,
         containerSombreado: cardSombreado,
         containerTarefa: novaTarefa,
         cabecalho: cabecalhoCard,
@@ -183,7 +200,11 @@ function criarCardTarefa(tarefa){
 }
 
 function estilizarCardTarefa(cardTarefa){
+    cardTarefa.containerSombreado.setAttribute('id', cardTarefa.idTarefa);
     cardTarefa.containerSombreado.className = "card shadow-sm mb-3";
+    cardTarefa.containerSombreado.draggable = "true";
+    cardTarefa.containerSombreado.addEventListener('dragstart', drag);
+
     cardTarefa.containerTarefa.className = "card-body";
     cardTarefa.cabecalho.className = "d-flex justify-content-between align-items-center mb-2";
     cardTarefa.badge.className = "badge bg-primary";
@@ -211,19 +232,21 @@ function estilizarCardTarefa(cardTarefa){
 
     if(cardTarefa.prioridade.innerText == 'ALTA'){
         cardTarefa.prioridade.className = "progress-bar bg-danger";
+        cardTarefa.prioridade.getElementsByTagName("p")[0].className = "text-danger";
         cardTarefa.prioridade.title = "Prioridade: Alta";
     }
     else if(cardTarefa.prioridade.innerText == 'MEDIA'){
         cardTarefa.prioridade.className = "progress-bar bg-warning";
+        cardTarefa.prioridade.getElementsByTagName("p")[0].className = "text-warning";
         cardTarefa.prioridade.title = "Prioridade: Média";
     }
     else{
         cardTarefa.prioridade.className = "progress-bar bg-success";
+        cardTarefa.prioridade.getElementsByTagName("p")[0].className = "text-success";
         cardTarefa.prioridade.title = "Prioridade: Baixa";
     }
 
-    cardTarefa.prioridade.getElementsByTagName("p").className = "d-none";
-
+    
 }
 
 function estilizarBotaoMais(botaoMais){
@@ -277,4 +300,22 @@ function desformataData(data){
     let [dia, mes, ano] = data.split('/');
 
     return `${ano}-${mes}-${dia}`;
+}
+
+function allowDrop(ev) {
+    ev.preventDefault();
+}
+
+function drag(ev) {
+    ev.dataTransfer.setData("text", ev.target.id);
+}
+
+function drop(ev) {
+    ev.preventDefault();
+    const data = ev.dataTransfer.getData("text");
+    const elemento = document.getElementById(data);
+  
+    if (ev.target.classList.contains('task-column')) {
+        ev.target.appendChild(elemento);
+    }
 }

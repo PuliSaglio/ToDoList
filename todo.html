@@ -20,16 +20,16 @@
     <div class="row g-3 justify-content-between">
       <div class="col-md-4 coluna">
         <h5>A Fazer</h5>
-        <div id="colunaAfazer" class="task-column"> 
+        <div id="colunaAfazer" class="task-column" ondragover="allowDrop(event)" ondrop="drop(event)"> 
         </div>
       </div>
       <div class="col-md-4 coluna">
         <h5>Em Andamento</h5>
-        <div id="colunaAndamento" class="task-column"></div>
+        <div id="colunaAndamento" class="task-column"  ondragover="allowDrop(event)" ondrop="drop(event)"></div>
       </div>
-      <div class="col-md-4 coluna">
+      <div class="col-md-4 coluna" >
         <h5>Concluído</h5>
-        <div id="colunaConcluido" class="task-column"></div>
+        <div id="colunaConcluido" class="task-column" ondragover="allowDrop(event)" ondrop="drop(event)"></div>
       </div>
     </div>
   </div>
