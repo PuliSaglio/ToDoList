@@ -25,21 +25,10 @@ document.addEventListener('DOMContentLoaded' , function(){
             cardTarefa.dataCriacao.classList.toggle('d-none');
         });
 
-        cardTarefa.botaoEdit.addEventListener('click' , function(){
+        cardTarefa.botaoEdit.addEventListener('click', function(){
             modalEdit.classList.remove('d-none');
             tarefaEmEdicao = cardTarefa;
-            document.getElementById('tituloTarefaEdit').value = cardTarefa.titulo.innerText;
-            document.getElementById('descricaoTarefaEdit').value = cardTarefa.descricao.innerText;
-            document.getElementById('dataTarefaEdit').value = desformataData(cardTarefa.data.innerText);
-            document.getElementById('prioridadeTarefaEdit').value = cardTarefa.prioridade.innerText;
-
-            const notificacao = cardTarefa.notificacao.innerHTML.trim().toLowerCase();
-
-            if (notificacao === 'sim') {
-                document.getElementById('notificaSimEdit').checked = true;
-            } else {
-                document.getElementById('notificaNaoEdit').checked = true;
-            }
+            preencherFormularioEdicao(cardTarefa);
         });
 
         cardTarefa.botaoApaga.addEventListener('click' , function(){
@@ -59,13 +48,27 @@ document.addEventListener('DOMContentLoaded' , function(){
         tarefaEmEdicao.descricao.innerText = dadosFormEdit.descricao;
         tarefaEmEdicao.data.innerText = dadosFormEdit.data;
         tarefaEmEdicao.prioridade.innerHTML = `<p>${dadosFormEdit.prioridade}</p>`;
-        console.log(tarefaEmEdicao.prioridade.innerHTML);
         tarefaEmEdicao.notificacao.innerHTML = dadosFormEdit.notificacao;
 
         estilizarCardTarefa(tarefaEmEdicao);
         tarefaEmEdicao = null;
-
     });
+
+    function preencherFormularioEdicao(cardTarefa){
+            document.getElementById('tituloTarefaEdit').value = cardTarefa.titulo.innerText;
+            document.getElementById('descricaoTarefaEdit').value = cardTarefa.descricao.innerText;
+            document.getElementById('dataTarefaEdit').value = desformataData(cardTarefa.data.innerText);
+            document.getElementById('prioridadeTarefaEdit').value = cardTarefa.prioridade.innerText;
+
+            const notificacao = cardTarefa.notificacao.innerHTML.trim().toLowerCase();
+            if (notificacao === 'sim') {
+                document.getElementById('notificaSimEdit').checked = "true";
+                console.log('Definindo radio: ' + notificacao);
+            } else {
+                document.getElementById('notificaNaoEdit').checked = "true";
+                console.log('Definindo radio: ' + notificacao);
+            }
+    }
 
     btnAbrirModal.addEventListener('click', function(){
         const hoje = new Date().toISOString().split('T')[0];
