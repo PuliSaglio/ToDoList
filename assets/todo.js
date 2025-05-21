@@ -171,7 +171,7 @@ function criarCardTarefa(tarefa, contadorTarefa){
     notificacaoTarefa.innerHTML = tarefa.notificacao;
 
     const dataCriacao = document.createElement('p');
-    dataCriacao.innerHTML = tarefa.dataCriacao;
+    dataCriacao.innerHTML = `<p>Data de criação: ${tarefa.dataCriacao}</p>`;
 
     const cardTarefa = {
         idTarefa: idTarefa,
