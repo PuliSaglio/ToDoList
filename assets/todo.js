@@ -57,7 +57,9 @@ document.addEventListener('DOMContentLoaded' , function(){
 
         // Apagar
         if (botao.title === 'Apagar') {
-            card.remove(); // Remove o card inteiro
+            console.log(card.id);
+            removerTarefaDoLocalStorage(card.id);
+            card.remove(); 
             return;
         }
     });
@@ -382,8 +384,8 @@ function extrairDadosDaTarefa(cardTarefa) {
         titulo: cardTarefa.titulo.innerText,
         descricao: cardTarefa.descricao.innerText,
         data: cardTarefa.data.innerText,
-        prioridade: cardTarefa.prioridade,
-        dataCriacao: cardTarefa.dataCriacao.innerText.replace(/^Data de criação: \s*/, ''),
+        prioridade: cardTarefa.prioridade.innerText.replace(/^Prioridade: \s*/, ''),
+        dataCriacao: cardTarefa.dataCriacao.innerText.replace(/^Data de criação:\s*/, ''),
         notificacao: cardTarefa.notificacao.innerText
     };
 }
@@ -416,7 +418,6 @@ function extrairDadosDoCard(card) {
 function iterarTarefas(){
     const listaTarefas = document.getElementsByClassName("card shadow-sm mb-3");
     const tarefas = Array.from(listaTarefas).map(tarefa => extrairDadosDoCard(tarefa));
-
     return tarefas;
 }
 
@@ -518,6 +519,7 @@ function carregarTarefasSalvas() {
 function removerTarefaDoLocalStorage(id) {
     const tarefasSalvas = JSON.parse(localStorage.getItem('tarefas')) || [];
 
-    const tarefasAtualizadas = tarefasSalvas.filter(tarefa => tarefa.id !== id);
+
+    const tarefasAtualizadas = tarefasSalvas.filter(tarefa => tarefa.id !== Number(id));
     localStorage.setItem('tarefas', JSON.stringify(tarefasAtualizadas));
 }
