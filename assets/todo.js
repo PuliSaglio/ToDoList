@@ -14,27 +14,61 @@ document.addEventListener('DOMContentLoaded' , function(){
 
     const botaoReset = document.getElementById('btnResetForm');
 
+    carregarTarefasSalvas();
+
+
+
+    document.getElementById('filtroOrdenacao').addEventListener('change', function() {
+        const criterio = this.value;
+        tarefas = iterarTarefas(contadorTarefa);
+        contadorTarefa++;
+        arrayOrdenado = ordenarTarefas(criterio, tarefas);
+        reordenarTarefas(arrayOrdenado, contadorTarefa);
+    });
+
+
+    document.getElementById('colunaAfazer').addEventListener('click', function(event) {
+        const botao = event.target.closest('button');
+        if (!botao) return;
+
+        const card = botao.closest('.card');
+        if (!card) return;
+
+        const descricao = card.querySelector('.descricao');
+        const dataCriacao = card.querySelectorAll('.dataCriacao')[0];
+        const notificacao = card.querySelector('.notificacao');
+
+        // Ver Mais
+        if (botao.title === 'Ver Mais') {
+            descricao?.classList.toggle('d-none');
+            dataCriacao?.classList.toggle('d-none');
+            notificacao?.classList.toggle('d-none');
+            return;
+        }
+
+        // Editar
+        if (botao.title === 'Editar') {
+            modalEdit.classList.remove('d-none');
+            tarefaEmEdicao = obterCardTarefa(card);
+            preencherFormularioEdicao(tarefaEmEdicao);
+            contadorTarefa++;
+            return;
+        }
+
+        // Apagar
+        if (botao.title === 'Apagar') {
+            card.remove(); // Remove o card inteiro
+            return;
+        }
+    });
+
     form.addEventListener('submit', function(event){
         event.preventDefault();
         const cardTarefa = criarCardTarefa(coletarDadosForm(), contadorTarefa);
         contadorTarefa++;
         estilizarCardTarefa(cardTarefa);
         adicionarTarefa(cardTarefa);
-        cardTarefa.botaoMais.addEventListener('click' , function(){
-            cardTarefa.descricao.classList.toggle('d-none');
-            cardTarefa.dataCriacao.classList.toggle('d-none');
-        });
-
-        cardTarefa.botaoEdit.addEventListener('click', function(){
-            modalEdit.classList.remove('d-none');
-            tarefaEmEdicao = cardTarefa;
-            preencherFormularioEdicao(cardTarefa);
-        });
-
-        cardTarefa.botaoApaga.addEventListener('click' , function(){
-            cardTarefa.containerSombreado.remove();
-        });
-
+        salvarTarefaNoLocalStorage(cardTarefa);
         form.reset();
         modal.classList.add('d-none');
     });
@@ -44,11 +78,13 @@ document.addEventListener('DOMContentLoaded' , function(){
         modalEdit.classList.add('d-none');  
         const dadosFormEdit = coletarDadosFormEdit();
 
+        removerTarefaDoLocalStorage(tarefaEmEdicao.idTarefa);
         tarefaEmEdicao.titulo.innerText = dadosFormEdit.titulo;
         tarefaEmEdicao.descricao.innerText = dadosFormEdit.descricao;
         tarefaEmEdicao.data.innerText = dadosFormEdit.data;
         tarefaEmEdicao.prioridade.innerHTML = `<p>${dadosFormEdit.prioridade}</p>`;
         tarefaEmEdicao.notificacao.innerHTML = dadosFormEdit.notificacao;
+        salvarTarefaNoLocalStorage(tarefaEmEdicao);
 
         estilizarCardTarefa(tarefaEmEdicao);
         tarefaEmEdicao = null;
@@ -63,10 +99,8 @@ document.addEventListener('DOMContentLoaded' , function(){
             const notificacao = cardTarefa.notificacao.innerHTML.trim().toLowerCase();
             if (notificacao === 'sim') {
                 document.getElementById('notificaSimEdit').checked = "true";
-                console.log('Definindo radio: ' + notificacao);
             } else {
                 document.getElementById('notificaNaoEdit').checked = "true";
-                console.log('Definindo radio: ' + notificacao);
             }
     }
 
@@ -176,6 +210,8 @@ function criarCardTarefa(tarefa, contadorTarefa){
     const dataCriacao = document.createElement('p');
     dataCriacao.innerHTML = `<p>Data de criação: ${tarefa.dataCriacao}</p>`;
 
+    
+
     const cardTarefa = {
         idTarefa: idTarefa,
         containerSombreado: cardSombreado,
@@ -230,8 +266,13 @@ function estilizarCardTarefa(cardTarefa){
     cardTarefa.iconeBotaoApaga.className = "bi bi-trash";
 
 
+    cardTarefa.descricao.classList = "descricao";
+    cardTarefa.notificacao.classList = "notificacao";
+    cardTarefa.dataCriacao.classList = "dataCriacao";
+
     cardTarefa.descricao.classList.add('d-none');
     cardTarefa.dataCriacao.classList.add('d-none');
+    cardTarefa.notificacao.classList.add('d-none');
 
     if(cardTarefa.prioridade.innerText == 'ALTA'){
         cardTarefa.prioridade.className = "progress-bar bg-danger";
@@ -281,7 +322,8 @@ function adicionarTarefa(cardTarefa){
     cardTarefa.cabecalho.appendChild(cardTarefa.badge);
     cardTarefa.containerTarefa.appendChild(cardTarefa.descricao);
     cardTarefa.containerTarefa.appendChild(cardTarefa.dataCriacao);
-    cardTarefa.containerTarefa.appendChild(cardTarefa.divBotoes)
+    cardTarefa.containerTarefa.appendChild(cardTarefa.notificacao);
+    cardTarefa.containerTarefa.appendChild(cardTarefa.divBotoes);
     cardTarefa.divBotoes.appendChild(cardTarefa.botaoMais);
     cardTarefa.botaoMais.appendChild(cardTarefa.iconeBotaoMais);
     cardTarefa.divBotoes.appendChild(cardTarefa.divBotoesEditApaga);
@@ -291,7 +333,17 @@ function adicionarTarefa(cardTarefa){
     cardTarefa.botaoApaga.appendChild(cardTarefa.iconeBotaoApaga);
     colunaTodo.appendChild(cardTarefa.containerSombreado);
     cardTarefa.containerSombreado.appendChild(cardTarefa.containerTarefa);
+
+    const dadosTarefa = extrairDadosDaTarefa(cardTarefa);
+
+    cardTarefa.cabecalho.addEventListener('click', () => {
+        localStorage.setItem('tarefaSelecionada', JSON.stringify(dadosTarefa));
+        window.location.href = 'detalhe.html';
+    });
+
 }
+
+
 
 function formataData(data){
     let [ano, mes, dia] = data.split('-');
@@ -321,4 +373,151 @@ function drop(ev) {
     if (ev.target.classList.contains('task-column')) {
         ev.target.appendChild(elemento);
     }
+}
+
+function extrairDadosDaTarefa(cardTarefa) {
+    console.log(cardTarefa);
+    return {
+        id: cardTarefa.idTarefa,
+        titulo: cardTarefa.titulo.innerText,
+        descricao: cardTarefa.descricao.innerText,
+        data: cardTarefa.data.innerText,
+        prioridade: cardTarefa.prioridade,
+        dataCriacao: cardTarefa.dataCriacao.innerText.replace(/^Data de criação: \s*/, ''),
+        notificacao: cardTarefa.notificacao.innerText
+    };
+}
+
+
+function extrairDadosDoCard(card) {
+    const idTarefa = parseInt(card.id);
+    const prioridade = card.querySelector('.progress-bar p')?.innerText.trim(); 
+    const titulo = card.querySelector('.card-title')?.innerText.trim();         
+    const data = card.querySelector('time')?.innerText.trim();            
+    const descricao = card.querySelector('.descricao')?.innerText.trim();       
+    const dataCriacao = card.querySelectorAll('.dataCriacao')[0]?.innerText
+    .replace('Data de criação:', '')
+    .trim();
+    const notificacao = Array.from(card.querySelectorAll('p'))
+    .map(p => p.innerText.trim().toLowerCase())
+    .find(txt => txt === 'sim' || txt === 'nao');
+
+    return {
+        idTarefa,
+        prioridade,
+        titulo,
+        data,
+        descricao,
+        dataCriacao,
+        notificacao
+    };
+}
+
+function iterarTarefas(){
+    const listaTarefas = document.getElementsByClassName("card shadow-sm mb-3");
+    const tarefas = Array.from(listaTarefas).map(tarefa => extrairDadosDoCard(tarefa));
+
+    return tarefas;
+}
+
+function ordenarTarefas(criterio, tarefas) {
+  switch (criterio) {
+    case 'dataCriacao':
+      tarefas.sort((a, b) => new Date(a.dataCriacao) - new Date(b.dataCriacao));
+      break;
+    case 'dataTarefa':
+        tarefas.sort((a, b) => {
+            const dataA = desformataData(a.data);
+            const dataB = desformataData(b.data);
+            return new Date(dataA) - new Date(dataB);
+        });
+        break;
+    case 'prioridade':
+      const ordem = { 'ALTA': 1, 'MEDIA': 2, 'BAIXA': 3 };
+      tarefas.sort((a, b) => ordem[a.prioridade] - ordem[b.prioridade]);
+      break;
+    case 'descricao':
+      tarefas.sort((a, b) => a.descricao.localeCompare(b.descricao));
+      break;
+  }
+
+  return tarefas;
+}
+
+function reordenarTarefas(arrayOrdenado) {
+  const container = document.getElementById('colunaAfazer');
+  container.innerHTML = ''; 
+
+  arrayOrdenado.forEach(dados => {
+    const card = criarCardTarefa(dados, dados.idTarefa); 
+    estilizarCardTarefa(card);           
+    adicionarTarefa(card);               
+  });
+}
+
+function obterCardTarefa(card) {
+  return {
+    idTarefa: parseInt(card.id),
+    containerSombreado: card,
+    containerTarefa: card.querySelector('.card-body'),
+    cabecalho: card.querySelector('.d-flex.justify-content-between.align-items-center.mb-2'),
+    badge: card.querySelector('.badge'),
+    divBotoes: card.querySelector('.d-flex.justify-content-between.align-items-center:last-child'),
+    divBotoesEditApaga: card.querySelector('.d-flex.gap-2'),
+    botaoMais: card.querySelector('button[title="Ver Mais"]'),
+    iconeBotaoMais: card.querySelector('button[title="Ver Mais"] i'),
+
+    botaoEdit: card.querySelector('button[title="Editar"]'),
+    iconeBotaoEdit: card.querySelector('button[title="Editar"] i'),
+
+    botaoApaga: card.querySelector('button[title="Apagar"]'),
+    iconeBotaoApaga: card.querySelector('button[title="Apagar"] i'),
+    descricao: card.querySelector('.descricao'),
+    dataCriacao: card.querySelectorAll('.dataCriacao')[0],
+    titulo: card.querySelector('.card-title'),
+    data: card.querySelector('time'),
+    prioridade: card.querySelector('.progress-bar p'),
+    notificacao: card.querySelector('.notificacao'),
+  };
+}
+
+function salvarTarefaNoLocalStorage(novaTarefa) {
+        const dadosTarefa = extrairDadosDaTarefa(novaTarefa);
+        let tarefas = [];
+
+    try {
+        const dados = JSON.parse(localStorage.getItem('tarefas'));
+        if (Array.isArray(dados)) {
+            tarefas = dados;
+        }
+    } catch (e) {
+        console.warn('Erro ao ler tarefas salvas:', e);
+    }
+
+    tarefas.push(dadosTarefa);
+    localStorage.setItem('tarefas', JSON.stringify(tarefas));
+}
+
+function carregarTarefasSalvas() {
+    const colunaAfazer = document.getElementById('colunaAfazer');
+    colunaAfazer.innerHTML = '';
+
+    const tarefasSalvas = JSON.parse(localStorage.getItem('tarefas')) || [];
+
+    if (Array.isArray(tarefasSalvas) && tarefasSalvas.length > 0) {
+        tarefasSalvas.forEach((tarefa, index) => {
+            const card = criarCardTarefa(tarefa, index);
+            estilizarCardTarefa(card);
+            adicionarTarefa(card);
+        });
+    } else {
+        console.warn('Nenhuma tarefa salva ou dado corrompido.');
+    }
+}
+
+function removerTarefaDoLocalStorage(id) {
+    const tarefasSalvas = JSON.parse(localStorage.getItem('tarefas')) || [];
+
+    const tarefasAtualizadas = tarefasSalvas.filter(tarefa => tarefa.id !== id);
+    localStorage.setItem('tarefas', JSON.stringify(tarefasAtualizadas));
 }
