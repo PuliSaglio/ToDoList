@@ -428,8 +428,8 @@ function ordenarTarefas(criterio, tarefas) {
       break;
     case 'dataTarefa':
         tarefas.sort((a, b) => {
-            const dataA = desformataData(a.data);
-            const dataB = desformataData(b.data);
+            let dataA = desformataData(a.data);
+            let dataB = desformataData(b.data);
             return new Date(dataA) - new Date(dataB);
         });
         break;
@@ -519,7 +519,9 @@ function carregarTarefasSalvas() {
 function removerTarefaDoLocalStorage(id) {
     const tarefasSalvas = JSON.parse(localStorage.getItem('tarefas')) || [];
 
+    const idNumero = typeof id === 'string' ? parseInt(id, 10) : id;
 
-    const tarefasAtualizadas = tarefasSalvas.filter(tarefa => tarefa.id !== Number(id));
+    const tarefasAtualizadas = tarefasSalvas.filter(tarefa => Number(tarefa.id) !== idNumero);
+
     localStorage.setItem('tarefas', JSON.stringify(tarefasAtualizadas));
 }
